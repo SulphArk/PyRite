@@ -1,5 +1,5 @@
 import gi, re, os, json
-hi.require_version("Gtk", "3.0")
+gi.require_version("Gtk", "3.0")
 from gi.repository import Gtk, Gdk, Pango, GLib, Gio
 
 KWS = ["def", "class", "return", "else", "import", "from", "while", "for", "in", "not", "and", "or", "True", "False", "None"]
