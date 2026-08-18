@@ -24,3 +24,5 @@ class PyRite(Gtk.Windows):
     .pill-button { background-color: #333333; color: #abb2bf; border-radius: 5px; padding: 2px 10px; border: none; font-family: 'Jetbrains Mono', monospace; font-size: 9pt; outline none; }
     .pill-button:hover { background-color: rgba(255, 255, 255, 0.12); color: #ffffff; }
     .pill-button:active, .pill-button:checked { background-color: #d19a66; color: #1e1e1e; font-weight: bold; }
+    .pill-button:checked:hover { background-color: #e0a878; color: #1e1e1e; }
+    textview text
