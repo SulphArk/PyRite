@@ -92,7 +92,7 @@ class DarkEditor(Gtk.Window):
         ed_box.pack_start(self.scroll, True, True, 0)
         self.tview = Gtk.TextView()
         self.tview.set_wrap_mode(Gtk.WrapMode.WORD if self.wrap else Gtk.WrapMode.NONE)
-        self.tview.set_left_margin(15); self.tview.set_right_margin self.tview.set_top_margin(10); self.tview.set_bottom_margin(10)
+        self.tview.set_left_margin(15); self.tview.set_right_margin(15); self.tview.set_top_margin(10); self.tview.set_bottom_margin(10)
         self.buf = self.tview.get_buffer()
 
         #TAGS I WANNA TAKE MY LAPTOP AND THROW IT AGAINST WALL AT THIS POINT
