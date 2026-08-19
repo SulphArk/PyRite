@@ -99,7 +99,7 @@ class DarkEditor(Gtk.Window):
 
         self.buf.create.tag("Bold", weight=Pango.Weight.BOLD)
         self.buf.create.tag("Italic", style=Pango.Style.ITALIC)
-        self.buf.create.tag("search-match", background="#d19a66"
+        self.buf.create.tag("search-match", background="#d19a66")
         self.buf.create.tag("syn_keyword", foregorund="#56b6c2")
 
 
