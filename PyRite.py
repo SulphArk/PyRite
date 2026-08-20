@@ -97,11 +97,27 @@ class DarkEditor(Gtk.Window):
 
         #TAGS I WANNA TAKE MY LAPTOP AND THROW IT AGAINST WALL AT THIS POINT
 
-        self.buf.create.tag("Bold", weight=Pango.Weight.BOLD)
-        self.buf.create.tag("Italic", style=Pango.Style.ITALIC)
-        self.buf.create.tag("search-match", background="#d19a66")
-        self.buf.create.tag("syn_keyword", foregorund="#56b6c2")
+        self.buf.create_tag("Bold", weight=Pango.Weight.BOLD)
+        self.buf.create_tag("Italic", style=Pango.Style.ITALIC)
+        self.buf.create_tag("search-match", background="#d19a66")
+        self.buf.create_tag("syn_keyword", foregorund="#56b6c2")
+        self.buf.create_tag("syn_string", foreground="#98c379")
+        slef.buf.create_tag("syn_comment", foreground="#5c6370", style=Pango.Style.ITALIC)
 
-
+        self.scroll.add(self.tview)
+        self.panned.pack1(ed_box, resize=True, shrink=False)
+        
 
         #NVM i just masterbated i dont feel the urge to throw my latop and do gencide
+
+         # ForkingRender Of tHE VIEW
+        self.render_scroll = Gtk.ScrolledWindow()
+        self.r_view = Gtk.TextView()
+        self.r_view.set_editable(False); self.r_view.set_cursor_visible(False); self.r_view.set_left_margin(15); self.r_view.set_right_margin(15); self.r_view.set_top_margin(10)
+        self.r_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        self.r_buf = self.r_view.get_buffer()
+        self.r_buf.create_tag("r_bold", weight=Pango.Weight.BOLD)
+        self.r_buf.create_tag("r_italic", style=Pango.Style.ITALIC)
+        self.render_scroll.add(self.r_view)
+        self.paned.pack2(self.render_scroll, resize=False, shrink=False)
+        self.render_scroll.hide()
