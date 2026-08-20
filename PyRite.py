@@ -165,5 +165,17 @@ class DarkEditor(Gtk.Window):
             i = Gtk.MenuItem(label=lbl); i.connect("activate", cb); self.menu.append(i)
         self.menu.append(Gtk.SeparatorMenuItem())
 
+        # Recnts
+        rec_mennu = Gtk.Menu()
+        if not self.recents:
+            i = Gtk.MenuItem(label="No recent files"); i.set_sensitive(False); rec_menu.append(i)
+        else:
+            for f in self.recents[:5]:
+                i = Gtk.MenuItem(label=os.path.basename(f)); i.connect("activate", lambda w, p=f: self.open_file(path=p)); rec_menu.append(i)
+        rec_item = Gtk.MenuItem(label="Recent Files"); rec_item.set_submenu(rec_menu); self.menu.append(rec_item)
+        self.menu.append(Gtk.SeparatorMenuItem())
+
+        # Toggles
+        self.chk_lines =Gtk.CheckMenuItem(label="Show Line Number); self.chck_lines.set_active
 
 
