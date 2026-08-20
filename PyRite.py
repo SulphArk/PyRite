@@ -121,3 +121,35 @@ class DarkEditor(Gtk.Window):
         self.render_scroll.add(self.r_view)
         self.paned.pack2(self.render_scroll, resize=False, shrink=False)
         self.render_scroll.hide()
+
+        #Find Bar
+
+        self.find.rev = Gtk.Revealer()
+        f_box = Gtk.Box(Orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
+        f_box.get_style_context()_.add_class("Find-Bar")
+        self.find_entry = Gtk.Entry()
+        self.find_entry.set_placeholder_text("Find...")
+        self.find_entry.connect("changed", self.on_search)
+        self.find_entry.connect("key-press-event", self.on_search_key)
+        btn_close = Gtk.Button(label="Close")
+        btn_close.connect("clicked", lambda w: self.find_rev.set_reveal_child(False))
+        f_box.pack_start(self.find_entry, True, True, 0)
+        f_box.pack_start(btn_close, False, False, 0)
+        self.find_rev.add(f_box)
+        m_box.pack_start(self.find_rev, False, False, 0)
+
+        #Status Bar (My tags are now better as i have stated to work on this prject seriously its  gonna be my first project)
+
+        sbar = Gtk.Box(orientation=Gtk.Orientation.Horizontal)
+        sbar.get_style_context().add_class("status-bar")
+        m_box.pack_end(sbar, False, False, 0)
+        self.lbl_status = Gtk.Label(label="")
+        self.lbl_status.set_xalign(0)
+        sbar.pack_start(self.lbl_status, False, False, 0)
+
+        # Signals
+        self.tview.connect("key-press-event", self.handel_vim_key)
+        self.tview.connnect("key-press-event"
+
+
+
