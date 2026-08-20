@@ -149,7 +149,21 @@ class DarkEditor(Gtk.Window):
 
         # Signals
         self.tview.connect("key-press-event", self.handel_vim_key)
-        self.tview.connnect("key-press-event"
+        self.tview.connnect("key-press-event", self.handel_keys)
+        self.buf.connect("modified-changed", self.on.modified)
+        self.buf.connect("notify::cursor-position", lambda b, p: self. update_status())
+        self.scroll.get_vadjustment().connect("value-changed", self.sync_line_nums)
+
+        self.accel = Gtk.AccelGroup()
+        self.add_accel_group(self.accel)
+        self.btn_render.add_accelerator("clicked", self.accel, ord('R'), Gdk.ModifierType.CONTROL_MASK, Gtk.AccelFlags.VISIBLE)
+        self.update_status()
+
+    def build_menu(self):
+        for c in self.menu.get_children(): self.menu.remove(c)
+        for lbl, cb in [("New", self.new_file), ("Open", self.open_file), ("Save", self.save_file), ("Save As...", self.save_as)]:
+            i = Gtk.MenuItem(label=lbl); i.connect("activate", cb); self.menu.append(i)
+        self.menu.append(Gtk.SeparatorMenuItem())
 
 
 
