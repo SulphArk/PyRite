@@ -126,7 +126,7 @@ class DarkEditor(Gtk.Window):
 
         self.find.rev = Gtk.Revealer()
         f_box = Gtk.Box(Orientation=Gtk.Orientation.HORIZONTAL, spacing=8)
-        f_box.get_style_context()_.add_class("Find-Bar")
+        f_box.get_style_context().add_class("Find-Bar")
         self.find_entry = Gtk.Entry()
         self.find_entry.set_placeholder_text("Find...")
         self.find_entry.connect("changed", self.on_search)
@@ -176,6 +176,6 @@ class DarkEditor(Gtk.Window):
         self.menu.append(Gtk.SeparatorMenuItem())
 
         # Toggles
-        self.chk_lines =Gtk.CheckMenuItem(label="Show Line Number); self.chck_lines.set_active
+        self.chk_lines = Gtk.CheckMenuItem(label="Show Line Numbers"); self.chk_lines.set_active(self.show_lines); self.chk_lines.connect("toggled", self.toggle_lines); self.menu.append(self.chk_lines)
 
 
