@@ -229,3 +229,17 @@ def toggle_syntax(self, w=None):
         if self.render_scroll.get_visible(): self.render_scroll.hide()
         else: self.render_scroll.show(); self.render_tags()
 
+def on_modified(self, w):
+        self.modified = self.buf.get_modified(); self.update_status()
+
+    def on_text_changed(self, w):
+        self.update_status()
+        s, e = self.buf.get_bounds()
+        self.buf.remove_tag_by_name("search-match", s, e) # un-highlight search on type
+        if self.show_lines: self.sync_line_nums()
+        if self.syntax:
+            if self.syntax_timeout: GLib.source_remove(self.syntax_timeout)
+            self.syntax_timeout = GLib.timeout_add(300, self._do_syntax_timeout) # throttle this so it doesn't lag to death
+
+
+h
