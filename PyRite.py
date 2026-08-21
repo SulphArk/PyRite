@@ -241,5 +241,17 @@ def on_modified(self, w):
             if self.syntax_timeout: GLib.source_remove(self.syntax_timeout)
             self.syntax_timeout = GLib.timeout_add(300, self._do_syntax_timeout) # throttle this so it doesn't lag to death
 
+         def _do_syntax_timeout(self):
+        self.do_syntax(); self.syntax_timeout = None; return False
 
-h
+    def sync_line_nums(self, w=None):
+        self.line_nums_buf.set_text("\n".join(str(i+1) for i in range(self.buf.get_line_count())))
+        self.line_nums.get_vadjustment().set_value(self.scroll.get_vadjustment().get_value())
+
+    def handle_keys(self, w, event):
+        # ctrl+f
+        if event.keyval == Gdk.keyval_from_name("f") and event.state & Gdk.ModifierType.CONTROL_MASK:
+            self.find_rev.set_reveal_child(True); self.find_entry.grab_focus(); return True
+        # alt+z
+        if event.keyval == Gdk.keyval_from_name("z") and event.state & Gdk.ModifierType.MOD1_MASK:
+            self.toggle_wrap(); return True
