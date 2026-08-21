@@ -186,3 +186,31 @@ class DarkEditor(Gtk.Window):
         self.menu.append(Gtk.SeparatorMenuItem())
         q = Gtk.MenuItem(label="Quit"); q.connect("activate", Gtk.main_quit); self.menu.append(q)
         self.menu.show_all()
+def load_recents(self):
+        if os.path.exists(self.recent_path):
+            try:
+                with open(self.recent_path, "r") as f: return json.load(f)
+            except: # idc
+                return []
+        return []
+
+    def save_recents(self):
+        with open(self.recent_path, "w") as f: json.dump(self.recents, f)
+
+    def add_recent(self, path):
+        if path in self.recents: self.recents.remove(path)
+        self.recents.insert(0, path)
+        self.recents = self.recents[:5]
+        self.save_recents(); self.build_menu()
+
+    def toggle_lines(self, w=None):
+        self.show_lines = w.get_active() if w else not self.show_lines
+        if self.show_lines: self.line_nums.show(); self.sync_line_nums()
+        else: self.line_nums.hide()
+
+    def toggle_wrap(self, w=None):
+        self.wrap = not self.wrap
+        self.tview.set_wrap_mode(Gtk.WrapMode.WORD if self.wrap else Gtk.WrapMode.NONE)
+        if hasattr(self, 'chk_wrap'): self.chk_wrap.set_active(self.wrap)
+
+
