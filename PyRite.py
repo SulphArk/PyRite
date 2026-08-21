@@ -97,6 +97,7 @@ class DarkEditor(Gtk.Window):
 
         #TAGS I WANNA TAKE MY LAPTOP AND THROW IT AGAINST WALL AT THIS POINT
 
+
         self.buf.create_tag("Bold", weight=Pango.Weight.BOLD)
         self.buf.create_tag("Italic", style=Pango.Style.ITALIC)
         self.buf.create_tag("search-match", background="#d19a66")
@@ -177,5 +178,11 @@ class DarkEditor(Gtk.Window):
 
         # Toggles
         self.chk_lines = Gtk.CheckMenuItem(label="Show Line Numbers"); self.chk_lines.set_active(self.show_lines); self.chk_lines.connect("toggled", self.toggle_lines); self.menu.append(self.chk_lines)
+        self.chk_wrap = Gtk.CheckMenuItem(label="Word Wrap"); self.chk_wrap.set_active(self
 
-
+.wrap); self.chk_wrap.connect("toggled", self.toggle_wrap); self.menu.append(self.chk_wrap)
+        self.chk_syn = Gtk.CheckMenuItem(label="Syntax Highlighting"); self.chk_syn.set_active(self.syntax); self.chk_syn.connect("toggled", self.toggle_syntax); self.menu.append(self.chk_syn)
+        
+        self.menu.append(Gtk.SeparatorMenuItem())
+        q = Gtk.MenuItem(label="Quit"); q.connect("activate", Gtk.main_quit); self.menu.append(q)
+        self.menu.show_all()
