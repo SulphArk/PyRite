@@ -213,4 +213,19 @@ def load_recents(self):
         self.tview.set_wrap_mode(Gtk.WrapMode.WORD if self.wrap else Gtk.WrapMode.NONE)
         if hasattr(self, 'chk_wrap'): self.chk_wrap.set_active(self.wrap)
 
+def toggle_syntax(self, w=None):
+        self.syntax = not self.syntax
+        if not self.syntax:
+            s, e = self.buf.get_bounds()
+            for t in ["syn_keyword", "syn_string", "syn_comment"]: self.buf.remove_tag_by_name(t, s, e)
+        else: self.do_syntax()
+        if hasattr(self, 'chk_syn'): self.chk_syn.set_active(self.syntax)
+        
+    def toggle_indent(self, w=None):
+        self.indent = "2s" if self.indent == "4s" else "Tab" if self.indent == "2s" else "4s"
+        self.btn_indent.set_label(self.indent); self.update_status()
+
+    def toggle_render(self, w=None):
+        if self.render_scroll.get_visible(): self.render_scroll.hide()
+        else: self.render_scroll.show(); self.render_tags()
 
