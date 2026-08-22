@@ -255,3 +255,118 @@ def on_modified(self, w):
         # alt+z
         if event.keyval == Gdk.keyval_from_name("z") and event.state & Gdk.ModifierType.MOD1_MASK:
             self.toggle_wrap(); return True
+
+            # auto-indent hack
+        if event.keyval == Gdk.keyval_from_name("Return") and not self.vim_mode:
+            buf = self.buf; itr = buf.get_iter_at_mark(buf.get_insert()); ln = itr.get_line()
+            if ln > 0:
+                ps = buf.get_iter_at_line(ln - 1); pe = ps.copy(); pe.forward_to_line_end()
+                prev = buf.get_text(ps, pe, True)
+                indent = re.match(r'^[ \t]*', prev).group(0) # faster than looping chars
+                
+                if prev.rstrip().endswith(":"):
+                    sz = 4 if self.indent == "4s" else 2 if self.indent == "2s" else 1
+                    indent += (" " if "s" in self.indent else "\t") * sz
+                
+                if indent: GLib.idle_add(lambda: buf.insert_at_cursor(indent))
+        return False
+
+    def toggle_vim(self, w=None):
+        self.vim_mode = self.btn_vim.get_active()
+        if self.vim_mode:
+            self.vim_state = "NORMAL"; self.vim_cmd_mode = False; self.vim_cmd = ""; self.btn_vim.set_label("Vim: ON")
+        else: self.btn_vim.set_label("Vim")
+        self.update_status()
+
+    def handle_vim_key(self, w, event):
+        if not self.vim_mode: return False
+
+        keyname = Gdk.keyval_name(event.keyval)
+        char = chr(Gdk.keyval_to_unicode(event.keyval)) if Gdk.keyval_to_unicode(event.keyval) != 0 else ""
+
+        if self.vim_cmd_mode:
+            if keyname == "Return": self.run_vim_cmd(); return True
+            elif keyname == "Escape": self.vim_cmd_mode = False; self.vim_cmd = ""
+            elif keyname == "BackSpace":
+                self.vim_cmd = self.vim_cmd[:-1]
+                if not self.vim_cmd: self.vim_cmd_mode = False
+            else: self.vim_cmd += char
+            self.update_status(); return True
+
+        if self.vim_state == "INSERT":
+            if keyname == "Escape":
+                self.vim_state = "NORMAL"; self.update_status(); return True
+            return False
+
+        if keyname == "Escape": self.vim_state = "NORMAL"; self.update_status(); return True
+
+        if char == ':': self.vim_cmd_mode = True; self.vim_cmd = ":"; self.update_status(); return True
+        elif char == 'i': self.vim_state = "INSERT"; self.update_status(); return True
+        elif char in ['h', 'j', 'k', 'l', 'x']:
+            mark = self.buf.get_insert(); itr = self.buf.get_iter_at_mark(mark)
+            if char == 'h': itr.backward_char()
+            elif char == 'l': itr.forward_char()
+            elif char == 'j': itr.forward_line()
+            elif char == 'k': itr.backward_line()
+            elif char == 'x':
+                end = itr.copy()
+                if not end.ends_line(): end.forward_char()
+                self.buf.delete(itr, end)
+            self.buf.place_cursor(itr); self.tview.scroll_to_mark(mark, 0.0, True, 0.0, 0.0); return True
+        return True
+
+    def run_vim_cmd(self):
+        cmd = self.vim_cmd.strip(":").strip()
+        if cmd == "w": self.save_file()
+        elif cmd == "q": Gtk.main_quit()
+        elif cmd == "wq": self.save_file(); Gtk.main_quit()
+        self.vim_cmd_mode = False; self.vim_cmd = ""; self.update_status()
+
+    def render_tags(self, w=None):
+        s, e = self.buf.get_bounds()
+        parts = re.split(r'(<ts=\d+>|</ts=\d+>|<italic>|</italic>|<bold>|</bold>)', self.buf.get_text(s, e, False))
+        self.r_buf.set_text("")
+        tags = []; tbl = self.r_buf.get_tag_table()
+        
+        for p in parts:
+            if not p: continue
+            if p == "<bold>": tags.append("r_bold")
+            elif p == "</bold>" and "r_bold" in tags: tags.remove("r_bold")
+            elif p == "<italic>": tags.append("r_italic")
+            elif p == "</italic>" and "r_italic" in tags: tags.remove("r_italic")
+            elif re.match(r'<ts=\d+>', p):
+                sz = p.split("=")[1][:-1]; tname = f"r_ts_{sz}"
+                if not tbl.lookup(tname): self.r_buf.create_tag(tname, scale=float(sz)/11.0)
+                tags.append(tname)
+            elif re.match(r'</ts=\d+>', p):
+                for i in range(len(tags)-1, -1, -1):
+                    if tags[i].startswith("r_ts_"): tags.pop(i); break
+            else: self.r_buf.insert_with_tags_by_name(self.r_buf.get_end_iter(), p, *tags)
+
+    def do_syntax(self):
+        s, e = self.buf.get_bounds()
+        for t in ["syn_keyword", "syn_string", "syn_comment"]: self.buf.remove_tag_by_name(t, s, e)
+        text = self.buf.get_text(s, e, False)
+        
+        # comments
+        for m in re.finditer(r'(#.*?$)', text, re.MULTILINE):
+            self.buf.apply_tag_by_name("syn_comment", self.buf.get_iter_at_offset(m.start(1)), self.buf.get_iter_at_offset(m.end(1)))
+        # strings
+        for m in re.finditer(r'("(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\')', text):
+            self.buf.apply_tag_by_name("syn_string", self.buf.get_iter_at_offset(m.start(1)), self.buf.get_iter_at_offset(m.end(1)))
+        # keywords
+        for m in re.finditer(r'\b(' + '|'.join(KWS) + r')\b', text):
+            self.buf.apply_tag_by_name("syn_keyword", self.buf.get_iter_at_offset(m.start(1)), self.buf.get_iter_at_offset(m.end(1)))
+
+    def on_search(self, w):
+        q = self.find_entry.get_text()
+        s, e = self.buf.get_bounds()
+        self.buf.remove_tag_by_name("search-match", s, e)
+        if q:
+            i = s.copy()
+            while True:
+                m = i.forward_search(q, Gtk.TextSearchFlags.CASE_INSENSITIVE, e)
+                if not m: break
+                self.buf.apply_tag_by_name("search-match", m[0], m[1]); i = m[1]
+
+
